@@ -3,6 +3,11 @@ from tkinter import ttk
 import random
 import pandas as pd
 import os.path
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.neighbors import KNeighborsClassifier
+from statistics import mode
 
 '''Popup box for game results'''
 def popup_box(user, comp, label3_text):
@@ -19,7 +24,9 @@ def popup_box(user, comp, label3_text):
     
     B1 = ttk.Button(popup, text = "Ok", command = popup.destroy).pack()
 
-    user_array.append(user), comp_array.append(comp), final_results.append(label3_text)
+    user_array.append(user)
+    comp_array.append(comp)
+    final_results.append(label3_text)
     
     popup.mainloop()
 
@@ -38,7 +45,23 @@ def select_winner(user, comp):
 
 '''When user choice is selected, computer selection is also made''' 
 def button_selected(user_action):
-    comp_selection = random.choice([1, 2, 3])
+    if os.path.exists("/Users/jawahar/Desktop/Programming/GUI RPS.xlsx") == False:
+        comp_selection = random.choice([1, 2, 3])
+    else:
+        dataset = pd.read_excel("/Users/jawahar/Desktop/Programming/GUI RPS.xlsx")
+        X,y = np.array(dataset["User"]).reshape(-1,1), np.ravel(dataset["Computer"])
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+        scaler = MinMaxScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
+
+        #Classififcation model, not a neural network, so it does not know win or lose.
+        knn = KNeighborsClassifier()
+        knn.fit(X_train, y_train)
+        #print('Accuracy of K-NN classifier on training set: {:.2f}'.format(knn.score(X_train, y_train)))
+        #print('Accuracy of K-NN classifier on test set: {:.2f}'.format(knn.score(X_test, y_test)))
+        pred = knn.predict(X_test)
+        comp_selection = mode(pred)
     popup_box(user_action, comp_selection, select_winner(user_action, comp_selection))
 
 '''All games are saved onto a excel sheet'''
