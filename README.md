@@ -6,3 +6,4 @@ A traditional Rock, Paper, Scissors game with a GUI and another version with ML.
 2. Numpy
 3. Sklearn
 4. Statistics
+5. Tensorflow.keras
